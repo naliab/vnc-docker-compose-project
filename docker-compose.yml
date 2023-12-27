@@ -15,13 +15,17 @@ services:
     image: spark:python3
     container_name: "spark-master"
     ports:
-      - "9090:8080"
+      - "8080:8080"
       - "7077:7077"
     environment:
       SPARK_MODE: "master"
       SPARK_LOCAL_IP: "spark-master"
       SPARK_MASTER_PORT: "7077"
       SPARK_MASTER_WEBUI_PORT: "8080"
+    volumes:
+      - ./postgresql-42.7.0.jar:/jdbc.jar
+      - ./postgresql-42.7.0.jar:/opt/spark/jars/postgresql-driver.jar
+      - ./my_spark.py:/my_spark.py
     command: "/opt/spark/bin/spark-class org.apache.spark.deploy.master.Master"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://spark-master:8080"]
@@ -35,12 +39,14 @@ services:
       spark-master:
         condition: service_healthy
     ports:
-      - "9091:8080"
+      - "8080:8080"
       - "7000:7000"
     environment:
       SPARK_MODE: "worker"
       SPARK_MASTER: "spark://spark-master:7077"
       SPARK_WORKER_WEBUI_PORT: "8080"
+    volumes:
+      - ./postgresql-42.7.0.jar:/opt/spark/jars/postgresql-driver.jar
     command: "/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077"
   spark-worker-2:
     image: spark:python3
@@ -49,10 +55,12 @@ services:
       spark-master:
         condition: service_healthy
     ports:
-      - "9092:8080"
-      - "7001:7000"
+      - "8080:8080"
+      - "7000:7000"
     environment:
       SPARK_MODE: "worker"
       SPARK_MASTER: "spark://spark-master:7077"
       SPARK_WORKER_WEBUI_PORT: "8080"
+    volumes:
+      - ./postgresql-42.7.0.jar:/opt/spark/jars/postgresql-driver.jar
     command: "/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077"
