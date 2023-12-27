@@ -40,7 +40,7 @@ def main():
             city, location, num_rooms
         ORDER BY
             city, location, num_rooms
-    ''').show(df.count())
+    ''').show(20)
 
 if __name__ == '__main__':
         main()
